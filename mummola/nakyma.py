@@ -8,12 +8,13 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import FieldDoesNotExist
 from django.forms import ModelForm
 from django.http import JsonResponse
 from django.urls import path
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
-from django.utils.translation import gettext as _, override
+from django.utils.translation import gettext as _
 from django.views import generic
 
 from yhdiste import Yhdiste
@@ -93,6 +94,90 @@ class Nakyma(
     ''' Käyttäjänluontilomake ilman salasanavaatimuksia, Bootstrap-luokilla. '''
     return self.bootstrap_lomake(Kayttajanluontilomake(data=data))
     # def kayttajalomake
+
+  def on_salasana(self, nimi):
+    ''' True, jos kentän nimi viittaa salasanaan. '''
+    n = (nimi or '').lower()
+    return 'password' in n or 'salasana' in n
+    # def on_salasana
+
+  def kentan_otsikko(self, kohde, nimi):
+    ''' Palauta kentän verbose_name, tai nimi jos kenttää ei ole. '''
+    mallit = []
+    if kohde is not None:
+      mallit.append(kohde._meta)
+    mallit.append(get_user_model()._meta)
+    for meta in mallit:
+      try:
+        return str(meta.get_field(nimi).verbose_name)
+      except FieldDoesNotExist:
+        continue
+    if self.on_salasana(nimi):
+      return _('salasana')
+    return nimi
+    # def kentan_otsikko
+
+  def arvo_tekstiksi(self, nimi, arvo, kentta=None):
+    ''' Muotoile kentän arvo lokitekstiin; salasanat ovat `(salasana)`. '''
+    if self.on_salasana(nimi):
+      return '(salasana)'
+    if arvo is None:
+      return ''
+    if kentta is not None:
+      if kentta.choices:
+        return str(dict(kentta.flatchoices).get(arvo, arvo))
+      if kentta.get_internal_type() == 'DateTimeField':
+        try:
+          paikallinen = timezone.localtime(arvo)
+        except (ValueError, OverflowError, TypeError):
+          paikallinen = arvo
+        return paikallinen.isoformat(sep=' ', timespec='minutes')
+    return str(arvo)
+    # def arvo_tekstiksi
+
+  def kooste(self, kohde=None, vanha=None, **lisat):
+    '''
+    Tekstikooste kentistä muodossa `nimi: arvo; …`.
+
+    Mallista luetaan muut kuin pääavainkentät. Jos `vanha` on sanakirja
+    aiemmista arvoista, mukaan otetaan vain muuttuneet kentät. `lisat`
+    täydentää tai korvaa (esim. lomakkeen salasanakentät).
+    '''
+    osat = []
+    if kohde is not None:
+      for kentta in kohde._meta.concrete_fields:
+        if kentta.primary_key:
+          continue
+        nimi = kentta.name
+        arvo = getattr(kohde, nimi)
+        if vanha is not None and vanha.get(nimi) == arvo:
+          continue
+        osat.append(
+          f'{self.kentan_otsikko(kohde, nimi)}: '
+          f'{self.arvo_tekstiksi(nimi, arvo, kentta)}'
+        )
+    for nimi, arvo in lisat.items():
+      otsikko = self.kentan_otsikko(kohde, nimi)
+      kentta = None
+      if kohde is not None:
+        try:
+          kentta = kohde._meta.get_field(nimi)
+        except FieldDoesNotExist:
+          kentta = None
+      osat.append(
+        f'{otsikko}: {self.arvo_tekstiksi(nimi, arvo, kentta)}'
+      )
+    return '; '.join(osat)
+    # def kooste
+
+  def mallin_arvot(self, kohde):
+    ''' Palauta mallin kenttien nykyiset arvot lokikoosteen vertailuun. '''
+    return {
+      kentta.name: getattr(kohde, kentta.name)
+      for kentta in kohde._meta.concrete_fields
+      if not kentta.primary_key
+    }
+    # def mallin_arvot
 
   def kirjaa(self, kohde, toiminto, viesti=''):
     ''' Tallenna django.contrib.admin.LogEntry annetusta kohteesta. '''
@@ -268,7 +353,7 @@ class Nakyma(
     if isinstance(varaus, JsonResponse):
       return varaus
     varaus.save()
-    self.kirjaa(varaus, ADDITION)
+    self.kirjaa(varaus, ADDITION, self.kooste(varaus))
     return JsonResponse(self.varauksen_tiedot(varaus))
     # def varaa
 
@@ -277,17 +362,20 @@ class Nakyma(
     ''' Päivitä oma varaus. '''
     # pylint: disable=unused-argument
     try:
-      varaus = Varaus.objects.get(pk=pk, tekija=request.user)
+      varaus = Varaus.objects.select_related('tekija').get(
+        pk=pk, tekija=request.user,
+      )
     except (Varaus.DoesNotExist, ValueError):
       return JsonResponse(
         {'virhe': _('Varausta ei löytynyt.')},
         status=404,
       )
+    vanha = self.mallin_arvot(varaus)
     varaus = self.varaus_pyynnolta(request, varaus=varaus)
     if isinstance(varaus, JsonResponse):
       return varaus
     varaus.save()
-    self.kirjaa(varaus, CHANGE)
+    self.kirjaa(varaus, CHANGE, self.kooste(varaus, vanha=vanha))
     return JsonResponse(self.varauksen_tiedot(varaus))
     # def muokkaa
 
@@ -302,7 +390,7 @@ class Nakyma(
         {'virhe': _('Varausta ei löytynyt.')},
         status=404,
       )
-    self.kirjaa(varaus, DELETION)
+    self.kirjaa(varaus, DELETION, self.kooste(varaus))
     varaus.delete()
     return JsonResponse({'ok': True})
     # def poista
@@ -319,13 +407,10 @@ class Nakyma(
       )
     lomake.save()
     update_session_auth_hash(request, lomake.user)
-    # Kentän verbose_name tallennetaan kääntämättömänä, kuten admin tekee.
-    with override(None):
-      salasana = str(get_user_model()._meta.get_field('password').verbose_name)
     self.kirjaa(
       lomake.user,
       CHANGE,
-      [{'changed': {'fields': [salasana]}}],
+      self.kooste(password=lomake.cleaned_data.get('new_password1')),
     )
     return JsonResponse({'ok': True})
     # def vaihda_salasana
@@ -341,7 +426,14 @@ class Nakyma(
         status=400,
       )
     kayttaja = lomake.save()
-    self.kirjaa(kayttaja, ADDITION)
+    self.kirjaa(
+      kayttaja,
+      ADDITION,
+      self.kooste(
+        username=kayttaja.username,
+        password=lomake.cleaned_data.get('password1'),
+      ),
+    )
     return JsonResponse({
       'ok': True,
       'pk': kayttaja.pk,
