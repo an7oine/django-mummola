@@ -1,0 +1,48 @@
+{% extends "mummola/modaali.html" %}
+{% load i18n %}
+{% comment %}
+Uuden käyttäjän luontimodaali. Kentät Djangon UserCreationFormista
+(`kayttajalomake`): username, password1, password2.
+Lähetys: POST `?lisaa_kayttaja` (kayttaja.js).
+{% endcomment %}
+
+{% block tunnus %}kayttaja-modaali{% endblock tunnus %}
+
+{% block modal-title %}{% trans "Lisää käyttäjä" %}{% endblock modal-title %}
+
+{% block modal-content-open %}
+<form class="modal-content" id="kayttaja-lomake" method="post">
+{% endblock modal-content-open %}
+{% block modal-content-close %}
+</form>
+{% endblock modal-content-close %}
+
+{% block modal-body %}
+  {% csrf_token %}
+  {% for kentta in kayttajalomake %}
+    <div class="mb-3">
+      <label for="{{ kentta.id_for_label }}" class="form-label">
+        {{ kentta.label }}
+      </label>
+      {{ kentta }}
+    </div>
+  {% endfor %}
+  <div
+    class="alert alert-danger d-none"
+    id="kayttaja-virhe"
+    role="alert"
+    ></div>
+{% endblock modal-body %}
+
+{% block modal-footer %}
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+    >
+    {% trans "Peruuta" %}
+  </button>
+  <button type="submit" class="btn btn-primary">
+    {% trans "Lisää käyttäjä" %}
+  </button>
+{% endblock modal-footer %}

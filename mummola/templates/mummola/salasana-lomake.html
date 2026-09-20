@@ -1,0 +1,57 @@
+{% extends "mummola/modaali.html" %}
+{% load i18n %}
+{% comment %}
+Salasananvaihtomodaali. Kentät Djangon PasswordChangeFormista
+(`salasanalomake`): old_password, new_password1, new_password2.
+Lähetys: POST `?vaihda_salasana` (kayttaja.js).
+`data-avaa-salasana` avaa modaalin heti, jos käyttäjällä ei ole CHANGE-lokia.
+{% endcomment %}
+
+{% block tunnus %}salasana-modaali{% endblock tunnus %}
+
+{% block modal-div %}
+  id="salasana-modaali"
+  class="modal fade"
+  tabindex="-1"
+  aria-hidden="true"
+  {% if avaa_salasanamodaali %}data-avaa-salasana{% endif %}
+{% endblock modal-div %}
+
+{% block modal-title %}{% trans "Vaihda salasana" %}{% endblock modal-title %}
+
+{% block modal-content-open %}
+<form class="modal-content" id="salasana-lomake" method="post">
+{% endblock modal-content-open %}
+{% block modal-content-close %}
+</form>
+{% endblock modal-content-close %}
+
+{% block modal-body %}
+  {% csrf_token %}
+  {% for kentta in salasanalomake %}
+    <div class="mb-3">
+      <label for="{{ kentta.id_for_label }}" class="form-label">
+        {{ kentta.label }}
+      </label>
+      {{ kentta }}
+    </div>
+  {% endfor %}
+  <div
+    class="alert alert-danger d-none"
+    id="salasana-virhe"
+    role="alert"
+    ></div>
+{% endblock modal-body %}
+
+{% block modal-footer %}
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+    >
+    {% trans "Peruuta" %}
+  </button>
+  <button type="submit" class="btn btn-primary">
+    {% trans "Vaihda salasana" %}
+  </button>
+{% endblock modal-footer %}

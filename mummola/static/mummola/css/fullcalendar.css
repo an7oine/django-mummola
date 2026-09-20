@@ -1,0 +1,6 @@
+:root {
+  --fc-list-event-hover-bg-color: var(--bs-highlight-bg);
+}
+.fc-theme-bootstrap5-shaded {
+  background-color: var(--bs-body-bg);
+}

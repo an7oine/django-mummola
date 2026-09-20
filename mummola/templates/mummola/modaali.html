@@ -1,0 +1,94 @@
+{% comment %}
+Bootstrap 5 -modaalin runko. Aliluokat täyttävät otsikon, rungon ja alatunnisteen.
+Lomake kääritään `modal-content`-tason ympärille lohkoilla
+modal-content-open / modal-content-close.
+
+Lohkot:
+- tunnus
+- modal-title
+- modal-body
+- modal-footer
+- modal-content-open / modal-content-close
+
+Muuttujat:
+- tunnus
+- otsikko
+- sisalto
+- modal_dialog_div: modal-dialog
+- alareuna
+{% endcomment %}
+{% load i18n %}
+
+<div
+  {% block modal-div %}
+  id="{% block tunnus %}{{ tunnus }}{% endblock tunnus %}"
+  class="modal fade"
+  tabindex="-1"
+  aria-hidden="true"
+  {% endblock modal-div %}
+  >
+  <div
+    {% block modal-dialog-div %}
+    class="{{ modal_dialog_div|default:"modal-dialog" }}"
+    {% endblock modal-dialog-div %}
+    >
+    {% block modal-content-open %}
+    <div
+      {% block modal-content-div %}
+      class="modal-content"
+      {% endblock modal-content-div %}
+      >
+    {% endblock modal-content-open %}
+      {% block modal-content %}
+        <div
+          {% block modal-header-div %}
+          class="modal-header"
+          {% endblock modal-header-div %}
+          >
+          {% block modal-header %}
+            {% spaceless %}
+            <h5
+              {% block modal-title-div %}
+              class="modal-title"
+              {% endblock modal-title-div %}
+              >
+              {% block modal-title %}{{ otsikko }}{% endblock modal-title %}
+            </h5>
+            {% endspaceless %}
+
+            {% block sulje-nappi %}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="{% trans "Sulje" %}"
+                ></button>
+            {% endblock sulje-nappi %}
+          {% endblock modal-header %}
+        </div>
+
+        {% spaceless %}
+        <div
+          {% block modal-body-div %}
+          class="{{ modal_body_div|default:"modal-body" }}"
+          {% endblock modal-body-div %}
+          >
+          {% block modal-body %}{{ sisalto }}{% endblock modal-body %}
+        </div>
+        {% endspaceless %}
+
+        {% spaceless %}
+        <div
+          {% block modal-footer-div %}
+          class="modal-footer"
+          {% endblock modal-footer-div %}
+          >
+          {% block modal-footer %}{{ alareuna }}{% endblock modal-footer %}
+        </div>
+        {% endspaceless %}
+      {% endblock modal-content %}
+    {% block modal-content-close %}
+    </div>
+    {% endblock modal-content-close %}
+  </div>
+</div>

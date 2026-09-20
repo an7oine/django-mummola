@@ -1,0 +1,104 @@
+{% comment %}
+Protonin sisäänkirjautumissivu (`LoginView` käyttää tätä nimeä).
+
+Lomake `protoni.nakymat.Sisaankirjautumislomake`: username ja password
+kirjoitetaan käsin Bootstrap-luokkien vuoksi. Kenttää `tallenna_istunto`
+ei näytetä; ilman sitä Protoni asettaa istunnon vanhenemaan selaimen
+sulkeutuessa (`session.set_expiry(0)`).
+{% endcomment %}
+{% load static i18n %}
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8"/>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1"
+      />
+    <meta name="color-scheme" content="light dark"/>
+    <title>{% trans "Mummola" %}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      />
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+      />
+    <link rel="stylesheet" href="{% static "mummola/css/kirjaudu.css" %}"/>
+    <script src="{% static "mummola/js/teema.js" %}"></script>
+  </head>
+
+  <body class="mummola-kirjautumissivu">
+    <main class="card mummola-kortti">
+      <div class="card-body p-4 p-sm-5">
+        <header class="text-center mb-4">
+          <h1 class="mummola-tunnus mb-2">{% trans "Mummola" %}</h1>
+          <p class="mummola-koriste mb-0">&#10086;</p>
+          <p class="text-body-secondary fst-italic mt-3 mb-0">
+            {% trans "Yhteinen kalenteri rakkaimmille" %}
+          </p>
+        </header>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for virhe in form.non_field_errors %}
+                <div>{{ virhe }}</div>
+              {% endfor %}
+              {% for kentta in form %}
+                {% for virhe in kentta.errors %}
+                  <div>{{ kentta.label }}: {{ virhe }}</div>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label
+              for="{{ form.username.id_for_label }}"
+              class="form-label"
+              >
+              {{ form.username.label }}
+            </label>
+            <input
+              id="{{ form.username.id_for_label }}"
+              type="text"
+              name="{{ form.username.name }}"
+              class="form-control"
+              autocapitalize="none"
+              autocomplete="username"
+              autofocus
+              required
+              />
+          </div>
+
+          <div class="mb-4">
+            <label
+              for="{{ form.password.id_for_label }}"
+              class="form-label"
+              >
+              {{ form.password.label }}
+            </label>
+            <input
+              id="{{ form.password.id_for_label }}"
+              type="password"
+              name="{{ form.password.name }}"
+              class="form-control"
+              autocomplete="current-password"
+              required
+              />
+          </div>
+
+          <button type="submit" class="btn btn-mummola w-100 py-2">
+            {% trans "Kirjaudu" %}
+          </button>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>

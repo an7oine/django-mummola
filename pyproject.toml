@@ -1,0 +1,30 @@
+[build-system]
+requires = ["git-versiointi>=1.7c4", "setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-mummola"
+description = "Mummolan varauskalenteri"
+readme = "README.md"
+authors = [
+  {name = "Antti Hautaniemi", email = "antti.hautaniemi@me.com"},
+]
+requires-python = ">= 3.14"
+dynamic = ["version"]
+dependencies = [
+  "django-protoni>=0.5.4",
+  "django-sivumedia",
+  "django-yhdiste",
+]
+
+[project.entry-points."django.osoitteisto"]
+mummola = "mummola.nakyma"
+
+[project.entry-points."django.sovellus"]
+mummola = "mummola"
+
+[project.entry-points."django.asetukset"]
+mummola = "mummola.asetukset"
+
+[tool.setuptools.packages.find]
+include = ["mummola*"]

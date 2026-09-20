@@ -1,0 +1,107 @@
+{% comment %}
+Sivun runko: meta, media, sisältöaihio, käyttäjävalikko ja salasanamodaali.
+
+Lohkot: head, meta, favicon, sivutunnus, css, js, body, sisalto.
+Muuttujat: bootstrap, kuvaus, sivutunnus, media_alkutilanne,
+data_alkutilanne, sisaltoaihio, salasanalomake.
+{% endcomment %}
+{% load static %}
+<!doctype html>
+
+<html
+  lang="fi"
+  {% with bootstrap.ymparisto as y %}{% if y %}data-ymparisto="{{ y }}"{% endif %}{% endwith %}
+  >
+  <head>
+    {% block head %}
+
+      {% block meta %}
+        <meta charset="utf-8"/>
+        <meta
+          name="viewport"
+          content="{{ bootstrap.viewport }}"
+          />
+        {% if bootstrap.variteemat %}
+          <meta
+            name="color-scheme"
+            content="{{ bootstrap.variteemat }}"
+            />
+          <meta
+            name="theme-color"
+            content="{{ bootstrap.variteema_vaalea }}"
+            media="(prefers-color-scheme: light)"
+            />
+          <meta
+            name="theme-color"
+            content="{{ bootstrap.variteema_tumma }}"
+            media="(prefers-color-scheme: dark)"
+            />
+        {% endif %}
+        <meta
+          name="description"
+          content="{{ kuvaus }}"
+          data-solmu="sivukuvaus"
+          data-solmu-sisalto="content"
+          />
+      {% endblock meta %}
+
+      {% block favicon %}
+        <link
+          rel="shortcut icon"
+          {% if debug %}
+            href="{% static "testi-favicon.ico" %}"
+          {% else %}
+            href="{% static "favicon.ico" %}"
+          {% endif %}
+          />
+      {% endblock favicon %}
+
+      {% block sivutunnus %}
+        <title data-solmu="sivutunnus">{{ sivutunnus }}</title>
+      {% endblock sivutunnus %}
+
+      {% with view.media as media %}
+        {% block css %}
+          {{ media.css }}
+        {% endblock css %}
+
+        {% block js %}
+          {% if media_alkutilanne %}
+            {{ media_alkutilanne|json_script:"media-alkutilanne" }}
+          {% endif %}
+          {% if data_alkutilanne %}
+            {{ data_alkutilanne|json_script:"data-alkutilanne" }}
+            <script>
+              document.data = JSON.parse(
+                document.getElementById("data-alkutilanne").textContent
+              );
+            </script>
+          {% endif %}
+
+          {{ media.js }}
+
+          {# Näytä runko vasta kun DOM on valmis, jotta media ehtii latautua. #}
+          <script>
+            if (document.readyState === "loading")
+              window.addEventListener("DOMContentLoaded", function (e) {
+                document.body.style.removeProperty("display");
+              });
+            else
+              document.body.style.removeProperty("display");
+          </script>
+        {% endblock js %}
+      {% endwith %}
+    {% endblock head %}
+  </head>
+
+  {% block body %}
+  <body class="d-flex flex-column vh-100" style="display: none">
+    {% block sisalto %}
+      {% if sisaltoaihio %}{% include sisaltoaihio %}{% endif %}
+    {% endblock sisalto %}
+    {% include "mummola/kayttajavalikko.html" %}
+    {% include "mummola/salasana-lomake.html" %}
+    {% include "mummola/kayttaja-lomake.html" %}
+  </body>
+  {% endblock body %}
+</html>

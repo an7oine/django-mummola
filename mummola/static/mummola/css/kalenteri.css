@@ -1,0 +1,47 @@
+/*
+ * Sidotaan FullCalendarin omat värimuuttujat Bootstrapin teemamuuttujiin,
+ * jolloin kalenteri seuraa selaimen vaalea/tumma-valintaa.
+ */
+#mummola {
+  --fc-page-bg-color: var(--bs-body-bg);
+  --fc-neutral-bg-color: var(--bs-secondary-bg);
+  --fc-neutral-text-color: var(--bs-secondary-color);
+  --fc-border-color: var(--bs-border-color);
+  --fc-today-bg-color: var(--bs-tertiary-bg);
+  --fc-list-event-hover-bg-color: var(--bs-secondary-bg);
+  --fc-highlight-color: var(--bs-secondary-bg);
+}
+
+#mummola .fc-timegrid-event-harness,
+#mummola .fc-timegrid-event-harness > .fc-timegrid-event {
+  height: fit-content;
+}
+
+#mummola .fc-daygrid-day-top {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.mummola-kayttaja {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1040;
+}
+
+.mummola-kayttaja > .btn {
+  --bs-btn-padding-x: 0.65rem;
+  --bs-btn-padding-y: 0.5rem;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+#mummola .mummola-lapset {
+  margin-inline-end: auto;
+  font-size: 0.8em;
+  line-height: 1;
+  letter-spacing: -0.15em;
+  max-width: 70%;
+  overflow: hidden;
+}

@@ -1,0 +1,54 @@
+{% comment %}
+Kiinteä alanurkan dropup: kanta (`is_staff`), käyttäjän lisäys, salasanan
+vaihto ja uloskirjautuminen POST-pyyntönä `/kirjaudu/ulos/`.
+{% endcomment %}
+{% load i18n %}
+
+<div class="dropup mummola-kayttaja">
+  <button
+    type="button"
+    class="btn btn-secondary rounded-circle"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+    aria-label="{% trans "Käyttäjävalikko" %}"
+    >
+    <i class="bi bi-person-circle"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    {% if user.is_staff %}
+    <li>
+      <a class="dropdown-item" href="{% url 'admin:index' %}">
+        {% trans "Kanta" %}
+      </a>
+    </li>
+    {% endif %}
+    <li>
+      <button
+        type="button"
+        class="dropdown-item"
+        data-bs-toggle="modal"
+        data-bs-target="#kayttaja-modaali"
+        >
+        {% trans "Lisää käyttäjä" %}
+      </button>
+    </li>
+    <li>
+      <button
+        type="button"
+        class="dropdown-item"
+        data-bs-toggle="modal"
+        data-bs-target="#salasana-modaali"
+        >
+        {% trans "Vaihda salasana" %}
+      </button>
+    </li>
+    <li>
+      <form method="post" action="{% url 'kirjaudu-ulos' %}">
+        {% csrf_token %}
+        <button type="submit" class="dropdown-item">
+          {% trans "Kirjaudu ulos" %}
+        </button>
+      </form>
+    </li>
+  </ul>
+</div>

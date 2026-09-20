@@ -1,0 +1,14 @@
+{% comment %}
+Kalenterin juurielementti. solmu-js kutsuu esitystä `mummola` ja
+`kalenteri` (FullCalendar). Varausmodaali liitetään saman sivun loppuun.
+{% endcomment %}
+{% load i18n %}
+
+<div
+  id="mummola"
+  class="container-xl pt-3 h-100"
+  data-solmu="kalenteri"
+  data-solmu-esitys="mummola, kalenteri"
+  ></div>
+
+{% include "mummola/varaus-lomake.html" %}

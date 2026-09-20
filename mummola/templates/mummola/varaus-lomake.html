@@ -1,0 +1,145 @@
+{% extends "mummola/modaali.html" %}
+{% load i18n %}
+{% comment %}
+Uuden ja olemassa olevan varauksen yhteinen modaali.
+
+Piilotettu `pk` erottaa luonnin (`?varaa`) muokkauksesta (`?muokkaa&pk=`).
+Tekijä-kenttä näytetään vain muokkauksessa. Konteksti: sijainnit,
+tarkeysasteet, kayttajat.
+{% endcomment %}
+
+{% block tunnus %}varaus-modaali{% endblock tunnus %}
+
+{% block modal-title %}
+  <span id="varaus-lomake-otsikko">{% trans "Uusi varaus" %}</span>
+{% endblock modal-title %}
+
+{% block modal-content-open %}
+<form class="modal-content" id="varaus-lomake">
+{% endblock modal-content-open %}
+{% block modal-content-close %}
+</form>
+{% endblock modal-content-close %}
+
+{% block modal-body %}
+  {% csrf_token %}
+  <input type="hidden" name="pk" id="id_pk" value=""/>
+  <div class="mb-3 d-none" id="varaus-tekija-ryhma">
+    <label for="id_tekija" class="form-label">
+      {% trans "Tekijä" %}
+    </label>
+    <select
+      id="id_tekija"
+      name="tekija"
+      class="form-select"
+      >
+      {% for kayttaja in kayttajat %}
+        <option value="{{ kayttaja.pk }}">{{ kayttaja }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="id_alku" class="form-label">
+      {% trans "Alku" %}
+    </label>
+    <input
+      id="id_alku"
+      type="datetime-local"
+      name="alku"
+      class="form-control"
+      required
+      />
+  </div>
+  <div class="mb-3">
+    <label for="id_loppu" class="form-label">
+      {% trans "Loppu" %}
+    </label>
+    <input
+      id="id_loppu"
+      type="datetime-local"
+      name="loppu"
+      class="form-control"
+      required
+      />
+  </div>
+  <div class="mb-3">
+    <label for="id_sijainti" class="form-label">
+      {% trans "Sijainti" %}
+    </label>
+    <select
+      id="id_sijainti"
+      name="sijainti"
+      class="form-select"
+      required
+      >
+      {% for arvo, nimi in sijainnit %}
+        <option value="{{ arvo }}">{{ nimi }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="id_tarkeys" class="form-label">
+      {% trans "Tärkeys" %}
+    </label>
+    <select
+      id="id_tarkeys"
+      name="tarkeys"
+      class="form-select"
+      required
+      >
+      {% for aste in tarkeysasteet %}
+        <option value="{{ aste }}">{{ aste }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="id_lapset" class="form-label">
+      {% trans "Lasten määrä" %}
+    </label>
+    <input
+      id="id_lapset"
+      type="number"
+      name="lapset"
+      class="form-control"
+      min="0"
+      value="0"
+      required
+      />
+  </div>
+  <div class="mb-3">
+    <label for="id_kuvaus" class="form-label">
+      {% trans "Kuvaus" %}
+    </label>
+    <textarea
+      id="id_kuvaus"
+      name="kuvaus"
+      class="form-control"
+      rows="3"
+      ></textarea>
+  </div>
+  <div
+    class="alert alert-danger d-none"
+    id="varaus-virhe"
+    role="alert"
+    ></div>
+{% endblock modal-body %}
+
+{% block modal-footer %}
+  <button
+    type="button"
+    class="btn btn-danger me-auto d-none"
+    id="varaus-poista"
+    >
+    {% trans "Poista" %}
+  </button>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+    >
+    {% trans "Peruuta" %}
+  </button>
+  <button type="submit" class="btn btn-primary" id="varaus-tallenna">
+    {% trans "Varaa" %}
+  </button>
+{% endblock modal-footer %}

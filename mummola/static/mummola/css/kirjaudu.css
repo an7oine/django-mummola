@@ -1,0 +1,73 @@
+/*
+ * Kirjautumissivun tyylit: keskitetty kortti ja romanttinen otsikko.
+ * Värit seuraavat Bootstrapin teemaa (`data-bs-theme`).
+ */
+
+.mummola-kirjautumissivu {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(231, 145, 165, 0.38), transparent 55%),
+    radial-gradient(circle at 82% 4%, rgba(197, 160, 215, 0.32), transparent 52%),
+    radial-gradient(circle at 50% 104%, rgba(244, 198, 176, 0.38), transparent 56%);
+  background-attachment: fixed;
+}
+
+.mummola-kortti {
+  width: 100%;
+  max-width: 26rem;
+  border: 0;
+  border-radius: 1.25rem;
+  box-shadow: 0 1.5rem 3rem rgba(90, 40, 60, 0.18);
+}
+
+.mummola-tunnus {
+  font-family: "Great Vibes", "Snell Roundhand", "Apple Chancery", cursive;
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #b3576f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+[data-bs-theme=dark] .mummola-tunnus {
+  color: #f0a8bb;
+  text-shadow: none;
+}
+
+/* Koristeviiva otsikon alle: viivat ja keskellä kukkasydän. */
+.mummola-koriste {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #c98aa0;
+}
+
+.mummola-koriste::before,
+.mummola-koriste::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, currentColor, transparent);
+}
+
+.mummola-kortti .form-control:focus {
+  border-color: #d59aac;
+  box-shadow: 0 0 0 0.25rem rgba(179, 87, 111, 0.2);
+}
+
+.mummola-kortti .btn-mummola {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #b3576f;
+  --bs-btn-border-color: #b3576f;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #9c4760;
+  --bs-btn-hover-border-color: #9c4760;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #8a3d54;
+  --bs-btn-active-border-color: #8a3d54;
+  --bs-btn-focus-shadow-rgb: 179, 87, 111;
+}
