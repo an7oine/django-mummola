@@ -131,6 +131,8 @@ class Nakyma(
         'oma': varaus.tekija_id == self.request.user.pk,
         'tarkeys': varaus.tarkeys,
         'lapset': varaus.lapset,
+        'aikuiset': varaus.aikuiset,
+        'koirat': varaus.koirat,
         'sijainti': varaus.sijainti,
         'sijainti_naytto': varaus.get_sijainti_display(),
         'alku': alku.strftime('%Y-%m-%dT%H:%M'),
@@ -178,17 +180,23 @@ class Nakyma(
     try:
       tarkeys = int(request.POST.get('tarkeys'))
       lapset = int(request.POST.get('lapset') or 0)
+      aikuiset = int(request.POST.get('aikuiset') or 0)
+      koirat = int(request.POST.get('koirat') or 0)
     except (TypeError, ValueError):
-      tarkeys, lapset = None, None
+      tarkeys = lapset = aikuiset = koirat = None
 
     if alku is None or loppu is None or loppu <= alku:
       return JsonResponse(
         {'virhe': _('Tarkista ajanjakso.')},
         status=400,
       )
-    if tarkeys not in range(1, 6) or lapset is None or lapset < 0:
+    if (
+      tarkeys not in range(1, 6)
+      or None in (lapset, aikuiset, koirat)
+      or min(lapset, aikuiset, koirat) < 0
+    ):
       return JsonResponse(
-        {'virhe': _('Tarkista tärkeys ja lasten määrä.')},
+        {'virhe': _('Tarkista tärkeys ja osallistujamäärät.')},
         status=400,
       )
     if sijainti not in Sijainti.values:
@@ -215,10 +223,12 @@ class Nakyma(
     varaus.tarkeys = tarkeys
     varaus.kuvaus = kuvaus
     varaus.lapset = lapset
+    varaus.aikuiset = aikuiset
+    varaus.koirat = koirat
     varaus.sijainti = sijainti
     if varaus.paallekkaiset().exists():
       return JsonResponse(
-        {'virhe': _('Valittu aika on jo varattu.')},
+        {'virhe': _('Sinulla on jo varaus valitulla aikavälillä.')},
         status=409,
       )
     return varaus

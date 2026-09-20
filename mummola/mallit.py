@@ -31,6 +31,8 @@ class Varaus(models.Model):
   )
   kuvaus = models.TextField(_('kuvaus'), blank=True)
   lapset = models.PositiveSmallIntegerField(_('lasten määrä'), default=0)
+  aikuiset = models.PositiveSmallIntegerField(_('aikuisten määrä'), default=0)
+  koirat = models.PositiveSmallIntegerField(_('koirien määrä'), default=0)
   sijainti = models.CharField(
     _('sijainti'),
     max_length=16,
@@ -68,8 +70,12 @@ class Varaus(models.Model):
     # def vari
 
   def paallekkaiset(self):
-    ''' Palauta muut varaukset, joiden aikaväli leikkaa tätä varausta. '''
+    '''
+    Palauta muut saman tekijän varaukset, joiden
+    aikaväli leikkaa tätä varausta.
+    '''
     return Varaus.objects.filter(
+      tekija=self.tekija,
       alku__lt=self.loppu,
       loppu__gt=self.alku,
     ).exclude(pk=self.pk)

@@ -15,7 +15,7 @@ tarkeysasteet, kayttajat.
 {% endblock modal-title %}
 
 {% block modal-content-open %}
-<form class="modal-content" id="varaus-lomake">
+<form class="modal-content" id="varaus-lomake" data-mummola-ajax>
 {% endblock modal-content-open %}
 {% block modal-content-close %}
 </form>
@@ -92,19 +92,49 @@ tarkeysasteet, kayttajat.
       {% endfor %}
     </select>
   </div>
-  <div class="mb-3">
-    <label for="id_lapset" class="form-label">
-      {% trans "Lasten määrä" %}
-    </label>
-    <input
-      id="id_lapset"
-      type="number"
-      name="lapset"
-      class="form-control"
-      min="0"
-      value="0"
-      required
-      />
+  <div class="row">
+    <div class="col-4 mb-3">
+      <label for="id_lapset" class="form-label">
+        {% trans "Lasten määrä" %}
+      </label>
+      <input
+        id="id_lapset"
+        type="number"
+        name="lapset"
+        class="form-control"
+        min="0"
+        value="0"
+        required
+        />
+    </div>
+    <div class="col-4 mb-3">
+      <label for="id_aikuiset" class="form-label">
+        {% trans "Aikuisten määrä" %}
+      </label>
+      <input
+        id="id_aikuiset"
+        type="number"
+        name="aikuiset"
+        class="form-control"
+        min="0"
+        value="0"
+        required
+        />
+    </div>
+    <div class="col-4 mb-3">
+      <label for="id_koirat" class="form-label">
+        {% trans "Koirien määrä" %}
+      </label>
+      <input
+        id="id_koirat"
+        type="number"
+        name="koirat"
+        class="form-control"
+        min="0"
+        value="0"
+        required
+        />
+    </div>
   </div>
   <div class="mb-3">
     <label for="id_kuvaus" class="form-label">
