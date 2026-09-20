@@ -1,0 +1,14 @@
+# Tämä tiedosto on olemassa vain Railwayta (Railpack) varten; paikallisesti
+# projekti asennetaan komennolla `pip install -e .`.
+#
+# Railpack asentaa riippuvuudet vain tunnistamansa pakettihallinnan kautta:
+# pip (requirements.txt), poetry/pdm/uv (lock-tiedosto) tai pipenv (Pipfile).
+# Pelkkä setuptools-pohjainen pyproject.toml ei siis riitä.
+#
+# Viittaus on kirjoitettava `file://`-URL:na, koska Railpack kopioi
+# asennusvaiheeseen vain requirements.txt- ja pyproject.toml-tiedostot,
+# ellei riippuvuusluettelossa esiinny merkkijonoa `file://`
+# (ks. installNeedsAllFiles, core/providers/python/python.go). Pelkkä `.`
+# tuottaisi tyhjän paketin ilman mummola-moduulia. Railpack rakentaa
+# hakemistossa /app, joten polku on absoluuttinen.
+file:///app

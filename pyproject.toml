@@ -9,12 +9,15 @@ readme = "README.md"
 authors = [
   {name = "Antti Hautaniemi", email = "antti.hautaniemi@me.com"},
 ]
-requires-python = ">= 3.14"
+requires-python = ">= 3.13"
 dynamic = ["version"]
 dependencies = [
-  "django-protoni>=0.5.4",
+  "django-protoni>=0.5.5",
   "django-sivumedia",
   "django-yhdiste",
+  "gunicorn",
+  "psycopg[binary]",
+  "whitenoise",
 ]
 
 [project.entry-points."django.osoitteisto"]
