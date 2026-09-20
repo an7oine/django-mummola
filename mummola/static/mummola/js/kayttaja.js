@@ -58,6 +58,10 @@
 
     lomake.addEventListener("submit", function (e) {
       e.preventDefault();
+      let nappi = e.submitter || lomake.querySelector("[type=submit]");
+      let vapauta = window.mummolaNappi.lukitse(nappi);
+      if (! vapauta)
+        return;
       naytaLomakevirheet(virheEl, "");
       fetch(osoite, {
         method: "POST",
@@ -79,7 +83,7 @@
           virheEl,
           virhe instanceof Error ? virhe.message : virhe
         );
-      });
+      }).finally(vapauta);
     });
   }
 

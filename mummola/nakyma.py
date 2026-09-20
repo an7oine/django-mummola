@@ -69,6 +69,7 @@ class Nakyma(
 
     css = {'all': ['mummola/css/kalenteri.css']}
     js = [
+      'mummola/js/nappi.js',
       'mummola/js/esitys.js',
       'mummola/js/kayttaja.js',
     ]

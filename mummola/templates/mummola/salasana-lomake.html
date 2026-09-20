@@ -20,7 +20,7 @@ Lähetys: POST `?vaihda_salasana` (kayttaja.js).
 {% block modal-title %}{% trans "Vaihda salasana" %}{% endblock modal-title %}
 
 {% block modal-content-open %}
-<form class="modal-content" id="salasana-lomake" method="post">
+<form class="modal-content" id="salasana-lomake" method="post" data-mummola-ajax>
 {% endblock modal-content-open %}
 {% block modal-content-close %}
 </form>

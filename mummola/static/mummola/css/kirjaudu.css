@@ -71,3 +71,8 @@
   --bs-btn-active-border-color: #8a3d54;
   --bs-btn-focus-shadow-rgb: 179, 87, 111;
 }
+
+.mummola-odotus {
+  margin-inline-end: 0.4em;
+  vertical-align: -0.125em;
+}
