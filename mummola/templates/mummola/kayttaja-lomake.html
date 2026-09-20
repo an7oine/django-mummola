@@ -1,8 +1,9 @@
 {% extends "mummola/modaali.html" %}
 {% load i18n %}
 {% comment %}
-Uuden käyttäjän luontimodaali. Kentät Djangon UserCreationFormista
-(`kayttajalomake`): username, password1, password2.
+Uuden käyttäjän luontimodaali. Kentät `Kayttajanluontilomake`-luokasta
+(`kayttajalomake`): username, password1, password2. Salasanalle ei
+sovelleta `AUTH_PASSWORD_VALIDATORS`-vaatimuksia.
 Lähetys: POST `?lisaa_kayttaja` (kayttaja.js).
 {% endcomment %}
 
@@ -11,7 +12,7 @@ Lähetys: POST `?lisaa_kayttaja` (kayttaja.js).
 {% block modal-title %}{% trans "Lisää käyttäjä" %}{% endblock modal-title %}
 
 {% block modal-content-open %}
-<form class="modal-content" id="kayttaja-lomake" method="post">
+<form class="modal-content" id="kayttaja-lomake" method="post" data-mummola-ajax>
 {% endblock modal-content-open %}
 {% block modal-content-close %}
 </form>

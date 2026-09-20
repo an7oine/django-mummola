@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
+from django.forms import ModelForm
 from django.http import JsonResponse
 from django.urls import path
 from django.utils.dateparse import parse_datetime
@@ -19,6 +20,31 @@ from yhdiste import Yhdiste
 
 from .bootstrap import Nakyma as BootstrapNakyma
 from .models import Sijainti, Varaus
+
+
+class Kayttajanluontilomake(UserCreationForm):
+  '''
+  Uuden käyttäjän luonti kalenterin modaalin kautta.
+
+  Ohittaa `AUTH_PASSWORD_VALIDATORS`-tarkistukset (pituus, yleisyys,
+  numeerisuus, samankaltaisuus). Käyttäjänimen uniikkius ja
+  salasanakenttien vastaavuus tarkistetaan edelleen. Oman salasanan
+  vaihto (`PasswordChangeForm`) ja ylläpitopaneeli käyttävät
+  Djangon vakio-vaatimuksia.
+  '''
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['password1'].help_text = ''
+    self.fields['password2'].help_text = ''
+    # def __init__
+
+  def _post_clean(self):
+    ''' Älä aja `validate_password`-tarkistuksia luonnin yhteydessä. '''
+    ModelForm._post_clean(self)
+    # def _post_clean
+
+  # class Kayttajanluontilomake
 
 
 class Nakyma(
@@ -64,8 +90,8 @@ class Nakyma(
     # def salasanalomake
 
   def kayttajalomake(self, data=None):
-    ''' Djangon vakio käyttäjänluontilomake Bootstrap-kenttäluokilla. '''
-    return self.bootstrap_lomake(UserCreationForm(data=data))
+    ''' Käyttäjänluontilomake ilman salasanavaatimuksia, Bootstrap-luokilla. '''
+    return self.bootstrap_lomake(Kayttajanluontilomake(data=data))
     # def kayttajalomake
 
   def kirjaa(self, kohde, toiminto, viesti=''):
@@ -306,7 +332,7 @@ class Nakyma(
 
   @Yhdiste.toiminto(tyyppi='POST')
   def lisaa_kayttaja(self, request, *, lisaa_kayttaja, **kwargs):
-    ''' Luo uusi käyttäjä Djangon UserCreationForm-luokalla. '''
+    ''' Luo uusi käyttäjä ilman salasanan monimutkaisuusvaatimuksia. '''
     # pylint: disable=unused-argument
     lomake = self.kayttajalomake(data=request.POST)
     if not lomake.is_valid():
