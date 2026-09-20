@@ -1,14 +1,81 @@
 {% comment %}
 Kalenterin juurielementti. solmu-js kutsuu esitystä `mummola` ja
 `kalenteri` (FullCalendar). Varausmodaali liitetään saman sivun loppuun.
+
+Työkalupalkki (jakson nimike ja painikkeet) on rullaimen ulkopuolella,
+joten se pysyy paikallaan kalenterin sisältöä rullattaessa. Rullaimen
+ylä- ja alapuolella on pehmuste, johon rullaus tarttuu (scroll-snap):
+pieni liike palautuu kalenteriin, ja pehmusteeseen asti rullaaminen
+vaihtaa edelliseen tai seuraavaan jaksoon (ks. esitys.js). Rullauksen
+suunnasta kertoo reunassa venyvä nuoli.
 {% endcomment %}
 {% load i18n %}
 
-<div
-  id="mummola"
-  class="container-xl pt-3 h-100"
-  data-solmu="kalenteri"
-  data-solmu-esitys="mummola, kalenteri"
-  ></div>
+<div class="mummola-kehys">
+
+  {# Kiinteä työkalupalkki: ei liiku kalenterin sisällön mukana. #}
+  <div class="mummola-palkki container-xl">
+    <div class="mummola-palkki-osa">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-mummola-toiminto="today"
+        >{% translate "Tänään" %}</button>
+    </div>
+
+    <div class="mummola-palkki-osa mummola-palkki-nimike">
+      <h2 class="mummola-nimike m-0" data-mummola-nimike></h2>
+    </div>
+
+    <div class="mummola-palkki-osa">
+      <div class="btn-group" role="group" aria-label="{% translate "Näkymä" %}">
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-mummola-nakyma="paiva"
+          >{% translate "Päivä" %}</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-mummola-nakyma="timeGridWeek"
+          >{% translate "Viikko" %}</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-mummola-nakyma="dayGridMonth"
+          >{% translate "Kuukausi" %}</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-mummola-nakyma="listMonth"
+          >{% translate "Tapahtumat" %}</button>
+      </div>
+    </div>
+  </div>
+
+  {# Rullausvyöhyke: kalenteri ja sen reunoilla venyvät suuntanuolet. #}
+  <div class="mummola-vyohyke">
+
+    <div class="mummola-nuoli mummola-nuoli-ylos" aria-hidden="true">
+      <i class="bi bi-chevron-up"></i>
+    </div>
+    <div class="mummola-nuoli mummola-nuoli-alas" aria-hidden="true">
+      <i class="bi bi-chevron-down"></i>
+    </div>
+
+    <div class="mummola-rullain">
+      <div class="mummola-pehmuste"></div>
+      <div
+        id="mummola"
+        class="container-xl mummola-kalenteri"
+        data-solmu="kalenteri"
+        data-solmu-esitys="mummola, kalenteri"
+        ></div>
+      <div class="mummola-pehmuste mummola-pehmuste-loppu"></div>
+    </div>
+
+  </div>
+
+</div>
 
 {% include "mummola/varaus-lomake.html" %}

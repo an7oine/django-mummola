@@ -12,9 +12,186 @@
   --fc-highlight-color: var(--bs-secondary-bg);
 }
 
-#mummola .fc-timegrid-event-harness,
-#mummola .fc-timegrid-event-harness > .fc-timegrid-event {
-  height: fit-content;
+/* Kehys pitää työkalupalkin paikallaan ja rullausvyöhykkeen sen alla. */
+.mummola-kehys {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Vyöhyke rajaa nuolet kalenterin alueelle, palkin alapuolelle. */
+.mummola-vyohyke {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mummola-palkki {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.mummola-palkki-osa {
+  display: flex;
+  align-items: center;
+}
+
+.mummola-palkki-nimike {
+  justify-content: center;
+}
+
+.mummola-nimike {
+  font-size: 1.5rem;
+}
+
+/*
+ * Rullauksen suuntaan venyvä nuoli. Kehykselle asetetut muuttujat
+ * `--mummola-ylos` ja `--mummola-alas` (0…1) kertovat, miten pitkälle
+ * pehmusteeseen on rullattu (ks. esitys.js).
+ */
+.mummola-nuoli {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: #FFF;
+  font-size: 1.25rem;
+  line-height: 1;
+  pointer-events: none;
+  opacity: var(--mummola-nuoli-osuus);
+}
+
+.mummola-nuoli-ylos {
+  --mummola-nuoli-osuus: var(--mummola-ylos, 0);
+  top: 0;
+  transform:
+    translate(-50%, calc(-3rem + var(--mummola-nuoli-osuus) * 4rem))
+    scaleY(calc(0.55 + var(--mummola-nuoli-osuus) * 0.7));
+}
+
+.mummola-nuoli-alas {
+  --mummola-nuoli-osuus: var(--mummola-alas, 0);
+  bottom: 0;
+  transform:
+    translate(-50%, calc(3rem - var(--mummola-nuoli-osuus) * 4rem))
+    scaleY(calc(0.55 + var(--mummola-nuoli-osuus) * 0.7));
+}
+
+/*
+ * Jakson vaihto rullaamalla: kalenterin ylä- ja alapuolella on pehmuste,
+ * ja rullain tarttuu (scroll-snap) joko kalenteriin tai pehmusteeseen.
+ * Pieni rullan liike palautuu takaisin kalenteriin, ja vasta pehmusteeseen
+ * asti rullaaminen vaihtaa jakson (ks. esitys.js).
+ */
+.mummola-rullain {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  /*
+   * Rullain on vain jaksonvaihdon ele, ei sisällön selailua: oma palkki
+   * piilotetaan, jottei se näy kalenterin ruudukon palkin rinnalla.
+   */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mummola-rullain::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/*
+ * Jakson vaihtuessa vanha sisältö liukuu ulos ja uusi sisään (esitys.js).
+ * Rullaus ja scroll-snap ovat tällöin pois päältä, jottei tartunta
+ * keskeytä animaatiota, ja suuntanuoli häivähtää pois.
+ */
+.mummola-kehys[data-vaihtuu] .mummola-rullain {
+  overflow: hidden;
+  scroll-snap-type: none;
+}
+
+/* Liukuva jäljennös vanhasta jaksosta. */
+.mummola-jaljennos {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background-color: var(--bs-body-bg);
+  pointer-events: none;
+}
+
+.mummola-kehys[data-vaihtuu] .mummola-nuoli {
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.mummola-pehmuste {
+  height: 25%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.mummola-pehmuste-loppu {
+  scroll-snap-align: end;
+}
+
+.mummola-kalenteri {
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/*
+ * Varaus täyttää tuntiruudukossa koko kestonsa – näin monen päivän varaus
+ * näkyy kaikissa sarakkeissaan riippumatta ruudukon vierityskohdasta.
+ * Lyhyillekin varauksille jää tekstin verran korkeutta.
+ */
+#mummola .fc-timegrid-event-harness {
+  min-height: 1.6em;
+}
+
+/*
+ * Taustapalkit (mm. `businessHours`) asemoidaan rivikorkeuden mukaan.
+ * Rajaus estää niiden venyttämästä rullattavaa aluetta, jos mitoitus on
+ * hetkellisesti vanhentunut. Vaaka-akseli jää näkyväksi, jotta nykyhetken
+ * osoitin näkyy aika-akselin päällä.
+ */
+#mummola .fc-timegrid-body {
+  overflow-x: visible;
+  overflow-y: clip;
+}
+
+/*
+ * Kosketusnäytöllä pitkä painallus aloittaa varauksen valinnan, joten
+ * ruudukossa ei saa käynnistyä selaimen oma tekstinvalinta tai
+ * pikavalikko.
+ */
+@media (hover: none) {
+  #mummola .fc-timegrid-cols,
+  #mummola .fc-timegrid-slots,
+  #mummola .fc-daygrid-body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 #mummola .fc-daygrid-day-top {
@@ -37,11 +214,217 @@
   line-height: 1;
 }
 
-#mummola .mummola-lapset {
+/* Odottavan painikkeen Bootstrap-spinner. */
+.mummola-odotus {
+  margin-inline-end: 0.4em;
+  vertical-align: -0.125em;
+}
+
+/*
+ * Osallistujamäärät: symboli ja kpl-määrä. Leveällä näytöllä määrä
+ * asettuu symbolin päälle, kapealla alle, jotta merkit saa isommiksi.
+ */
+#mummola .mummola-osallistujat {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
   margin-inline-end: auto;
-  font-size: 0.8em;
+  font-size: 1em;
   line-height: 1;
-  letter-spacing: -0.15em;
-  max-width: 70%;
-  overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+#mummola .mummola-osallistuja {
+  position: relative;
+  display: inline-flex;
+  line-height: 1;
+  padding-inline-end: 0.45em;
+}
+
+#mummola .mummola-symboli {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+#mummola .mummola-maara {
+  position: absolute;
+  right: 0;
+  bottom: -0.05em;
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bs-body-color);
+  text-shadow:
+    0 0 2px var(--bs-body-bg),
+    0 0 2px var(--bs-body-bg),
+    0 0 3px var(--bs-body-bg);
+}
+
+#mummola .fc-col-header-cell {
+  position: relative;
+}
+
+#mummola .fc-col-header-cell .mummola-osallistujat {
+  justify-content: center;
+  margin: 0.1rem 0 0;
+}
+
+/* Viikkonäkymän koko päivä -rivillä ei näytetä kpl-määriä. */
+#mummola .fc-timegrid .fc-daygrid-body .mummola-osallistujat {
+  display: none;
+}
+
+/*
+ * Kapea näyttö: päivämääräväli omalle rivilleen keskelle, Tänään ja
+ * näkymävalitsin yhteiselle riville sen alle.
+ */
+@media (max-width: 767.98px) {
+  .mummola-palkki {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .mummola-palkki-nimike {
+    order: -1;
+    flex: 1 0 100%;
+  }
+
+  .mummola-nimike {
+    font-size: 1.15rem;
+  }
+
+  .mummola-palkki .btn {
+    --bs-btn-padding-x: 0.45rem;
+    font-size: 0.85rem;
+  }
+
+  /*
+   * Kapealla näytöllä symboli ja kpl-määrä allekkain. Kolme tyyppiä
+   * jäävät silti rinnakkain, koska kukin merkki on vain symbolin levyinen.
+   */
+  #mummola .mummola-osallistujat {
+    font-size: 0.95em;
+    gap: 0;
+    align-items: flex-start;
+  }
+
+  #mummola .mummola-osallistuja {
+    flex-direction: column;
+    align-items: center;
+    padding-inline-end: 0;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  #mummola .mummola-symboli {
+    font-size: 1.2em;
+  }
+
+  #mummola .mummola-maara {
+    position: static;
+    font-size: 0.8em;
+    text-shadow: none;
+  }
+
+  /* Viikon/päivän sarake on kapeampi kuin kuukausiruutu. */
+  #mummola .fc-col-header-cell .mummola-osallistujat {
+    font-size: 0.78rem;
+    width: 100%;
+    justify-content: space-evenly;
+  }
+
+  /* Pienemmällä pehmusteella jaksonvaihto vie vähemmän tyhjää tilaa. */
+  .mummola-pehmuste {
+    height: 15%;
+  }
+
+  /*
+   * Tiivis otsake ja aika-akseli: vuorokausi mahtuu kerralla, eikä
+   * ruudukolle jää omaa vieritystä sormen tieltä. Rivikorkeus tulee
+   * mitatusta tilasta (`--mummola-slot`, ks. esitys.js).
+   */
+  #mummola .fc-timegrid-slot {
+    height: var(--mummola-slot, 1.4em);
+  }
+
+  /*
+   * Ruudukko ja kuukausiruudut mitoitetaan mahtuviksi, joten niille ei
+   * jätetä omaa vieritystä: sormen veto kuuluu aina jaksonvaihdolle.
+   * Listanäkymät (päivä, tapahtumat) vierivät edelleen tavalliseen tapaan.
+   */
+  #mummola .fc-timegrid .fc-scroller,
+  #mummola .fc-daygrid-body .fc-scroller,
+  #mummola .fc-dayGridMonth-view .fc-scroller {
+    overflow: hidden !important;
+  }
+
+  /*
+   * Taustapalkit (mm. `businessHours`) asemoidaan rivikorkeuden mukaan.
+   * Rajaus estää niiden tekemästä ruudukosta vieritettävää, vaikka
+   * mitoitus olisi hetkellisesti vanhentunut. Vaaka-akseli jää näkyväksi,
+   * jotta nykyhetken osoitin näkyy aika-akselin päällä.
+   */
+  #mummola .fc-timegrid-body {
+    overflow-x: visible;
+    overflow-y: clip;
+  }
+
+  /*
+   * Poikkeus: jos vuorokausi ei mitoituksesta huolimatta mahdu, ruudukko
+   * vierii ennemmin kuin rajaa tunteja piiloon (ks. esitys.js).
+   */
+  #mummola.mummola-ruudukko-vierii .fc-timegrid .fc-scroller {
+    overflow: auto !important;
+  }
+
+  /* Matala aika-akseli: rivi saa kutistua tekstin mukana. */
+  #mummola .fc-timegrid-slot-label,
+  #mummola .fc-timegrid-axis {
+    font-size: 0.62em;
+    line-height: 1;
+  }
+
+  #mummola .fc-timegrid-slot-label-cushion {
+    padding: 0 3px;
+  }
+
+  /*
+   * Koko päivä -rivin merkinnät yhdelle riville, jottei rivi kasva
+   * tuntien tilasta. Bootstrapin `.text-wrap` kumotaan tässä.
+   */
+  #mummola .fc-daygrid-event .text-wrap {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /*
+   * Päiväsarake on kapealla näytöllä kapeampi kuin tunnin varaus on
+   * korkea, joten vähintään tunnin varauksissa teksti kääntyy pystyyn.
+   * Teksti pidetään yhdellä rivillä: rivittyessä se valuisi sarakkeen
+   * vasemman reunan yli ja alku jäisi piiloon.
+   */
+  #mummola .fc-timegrid-event.mummola-tunnin .fc-event-main {
+    writing-mode: vertical-rl;
+    overflow: hidden;
+  }
+
+  #mummola .fc-timegrid-event.mummola-tunnin .fc-event-main span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+  }
+
+  /* Vaakapehmuste pois, jotta osallistujamerkinnöille jää koko sarake. */
+  #mummola .fc-col-header-cell-cushion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.8em;
+    padding: 2px 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
 }
